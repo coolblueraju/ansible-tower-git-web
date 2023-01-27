@@ -5,8 +5,4 @@
   - package: "name=httpd state=present"
   - copy: "content='hi LW {{ myvar }} finally end to end automated ....' dest=/var/www/html/index.html"
   - service: "name=httpd state=started"
-    when: webstatus == "start"
-  - service: "name=httpd state=stopped"
-    when: webstatus == "stop"
-  
     
