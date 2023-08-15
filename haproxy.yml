@@ -5,7 +5,7 @@
   
   tasks:
     - name: Install HAProxy
-      apt:
+      yum:
         name: haproxy
         state: present
 
