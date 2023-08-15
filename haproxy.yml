@@ -1,6 +1,6 @@
 ---
 - name: Configure HAProxy
-  hosts: haproxy_servers
+  hosts: testing
   become: yes
   
   tasks:
