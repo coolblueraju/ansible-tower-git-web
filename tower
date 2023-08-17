@@ -1,0 +1,502 @@
+=============================================================
+To configure Git on the `control.realm15.example.com` server for the user `sysadmin` with the provided details and update the `create_users` project repository, you can follow these steps:
+
+1. **Install Git:**
+
+   Ensure Git is installed on the `control.realm15.example.com` server.
+
+2. **Git Configuration:**
+
+   Log in as the `sysadmin` user on the `control.realm15.example.com` server and run the following commands to configure Git with the provided user information:
+
+   ```bash
+   git config --global user.name "gituser"
+   git config --global user.email "gituser@control.realm15.example.com"
+   git config --global push.default simple
+   ```
+
+3. **Clone the Repository:**
+
+   Clone the `create_users.git` repository and navigate to the repository directory:
+
+   ```bash
+   git clone https://github.com/path/to/create_users.git
+   cd create_users
+   ```
+
+4. **Update the Project:**
+
+   Edit the `create_users.yml` playbook to add the specified tasks. Here's an example of how the playbook might look to add user `sally` to the developer group and add `node3` to the `dev` host group:
+
+   ```yaml
+   ---
+   - name: Update create_users project
+     hosts: localhost
+     tasks:
+       - name: Add user sally to developer group
+         user:
+           name: sally
+           groups: developer
+           append: yes
+   
+       - name: Add node3 to dev host group
+         add_host:
+           name: node3
+           groups: dev
+   ```
+
+5. **Commit and Push Changes:**
+
+   After making the necessary changes to the playbook, commit the changes and push them to the remote repository:
+
+   ```bash
+   git add create_users.yml
+   git commit -m "Add tasks to create_users playbook"
+   git push origin master
+   ```
+
+That's it! You have now configured Git on `control.realm15.example.com` for the `sysadmin` user, updated the `create_users` project repository with the specified tasks, and pushed the changes to the repository. Make sure to replace the placeholders (`https://github.com/path/to/create_users.git`) with the actual URL to your Git repository.
+
+================================================================================
+
+To update the Git repository for managing the `httpd_alias` with the provided information, follow these steps:
+
+1. **Clone the Repository:**
+
+   Clone the `httpd_alias.git` repository and navigate to the repository directory:
+
+   ```bash
+   git clone https://github.com/path/to/httpd_alias.git
+   cd httpd_alias
+   ```
+
+2. **Update the Playbook:**
+
+   Edit the `install_httpd_alias.yml` playbook to include the task for adding the alias and restarting the `httpd` service only if the alias is installed. Here's an example of how the playbook might look:
+
+   ```yaml
+   ---
+   - name: Install HTTPD Alias
+     hosts: webserver
+     tasks:
+       - name: Add alias to httpd configuration
+         lineinfile:
+           dest: /etc/httpd/conf/httpd.conf  # Adjust the path as needed
+           line: "Alias /myalias /path/to/alias/directory"
+           state: present
+         register: alias_added
+   
+       - name: Restart httpd service if alias is installed
+         service:
+           name: httpd
+           state: restarted
+         when: alias_added.changed
+   ```
+
+   Replace `/etc/httpd/conf/httpd.conf` with the actual path to your `httpd.conf` file and adjust the alias configuration accordingly.
+
+3. **Commit and Push Changes:**
+
+   After making the necessary changes to the playbook, commit the changes and push them to the remote repository:
+
+   ```bash
+   git add install_httpd_alias.yml
+   git commit -m "Add task to install HTTPD alias"
+   git push origin master
+   ```
+
+Now, when you run the `install_httpd_alias.yml` playbook, it will add the alias to the `httpd` configuration and restart the service only if the alias was added or modified. If the alias is already installed and the playbook is run again, the `httpd` service will not be restarted.
+
+Remember to replace the placeholders (`https://github.com/path/to/httpd_alias.git`) with the actual URL to your Git repository. Also, ensure that you have the appropriate permissions to modify the `httpd` configuration and restart the service on the target web server.
+
+=============================================================================
+
+
+To complete the playbook `manage_content.yml` for managing web content on the dev web server according to the given requirements, you can follow these steps:
+
+1. **Clone the Repository:**
+
+   Clone the `manage_content.git` repository and navigate to the repository directory:
+
+   ```bash
+   git clone https://github.com/path/to/manage_content.git
+   cd manage_content
+   ```
+
+2. **Update the Playbook:**
+
+   Edit the `manage_content.yml` playbook to include tasks for generating and deploying content based on the specified tags. Here's an example of how the playbook might look:
+
+   ```yaml
+   ---
+   - name: Manage Web Content
+     hosts: dev
+     tasks:
+       - name: Generate and deploy content - alpha
+         template:
+           src: templates/alpha_content.j2
+           dest: /var/www/html/index.html
+         when: "'alpha' in play_tags"
+   
+       - name: Generate and deploy content - beta
+         template:
+           src: templates/beta_content.j2
+           dest: /var/www/html/index.html
+         when: "'beta' in play_tags"
+   ```
+
+3. **Create Template Files:**
+
+   Create the template files `alpha_content.j2` and `beta_content.j2` inside the `templates` directory. These templates will contain the content that needs to be generated and deployed.
+
+   `alpha_content.j2`:
+   ```plaintext
+   Que Sera, Sera
+   ```
+
+   `beta_content.j2`:
+   ```plaintext
+   Whatever will be, will be
+   ```
+
+4. **Run the Playbook:**
+
+   Run the playbook with the appropriate tags to generate and deploy the desired content:
+
+   - To deploy the alpha content:
+     ```bash
+     ansible-playbook -i inventory.ini manage_content.yml --tags alpha
+     ```
+
+   - To deploy the beta content:
+     ```bash
+     ansible-playbook -i inventory.ini manage_content.yml --tags beta
+     ```
+
+   - To run the playbook without deploying any content:
+     ```bash
+     ansible-playbook -i inventory.ini manage_content.yml
+     ```
+
+Remember to replace placeholders (`https://github.com/path/to/manage_content.git`, `dev`) with the actual URL to your Git repository and the appropriate host group.
+
+Ensure that you have the necessary permissions to modify the web content on the target dev web servers. Also, make sure that Ansible is properly configured to connect to the target hosts.
+
+==============================================================
+
+To update the Ansible configuration in the `tune_ansible.git` repository with the specified changes, follow these steps:
+
+1. **Clone the Repository:**
+
+   Clone the `tune_ansible.git` repository and navigate to the repository directory:
+
+   ```bash
+   git clone https://github.com/path/to/tune_ansible.git
+   cd tune_ansible
+   ```
+
+2. **Update Ansible Configuration:**
+
+   Edit the Ansible configuration file (usually named `ansible.cfg`) to include the specified changes. If the configuration file doesn't exist, create it. Here's how your `ansible.cfg` file might look:
+
+   ```ini
+   [defaults]
+   gather_facts = no
+   forks = 50
+   ```
+
+   The above changes set `gather_facts` to `no` to disable fact gathering by default and set `forks` to 50 to limit the maximum number of simultaneous host connections.
+
+3. **Commit and Push Changes:**
+
+   After updating the Ansible configuration file, commit the changes and push them to the remote repository:
+
+   ```bash
+   git add ansible.cfg
+   git commit -m "Update Ansible configuration"
+   git push origin master
+   ```
+
+That's it! You have updated the Ansible configuration in the `tune_ansible.git` repository with the specified changes. Make sure to replace the placeholder (`https://github.com/path/to/tune_ansible.git`) with the actual URL to your Git repository. Also, ensure that you have the necessary permissions to modify the Ansible configuration files in the repository.
+
+==========================================
+
+To achieve the tasks described using the `create_users_complex.git` repository, you can create the `create_users.yml` playbook with the following steps. Assuming the repository structure includes `user_list.yml` and `inventory`:
+
+1. **Clone the Repository:**
+
+   Clone the `create_users_complex.git` repository and navigate to the repository directory:
+
+   ```bash
+   git clone https://github.com/path/to/create_users_complex.git
+   cd create_users_complex
+   ```
+
+2. **Create the Playbook:**
+
+   Create a `create_users.yml` playbook in the repository directory. Here's an example of how the playbook might look:
+
+   ```yaml
+   ---
+   - name: Create User Accounts
+     hosts: your_target_hosts
+     become: yes
+     tasks:
+       - name: Load user list
+         include_vars:
+           file: user_list.yml
+   
+       - name: Create user accounts
+         user:
+           name: "{{ item.name }}"
+           uid: "{{ item.uid }}"
+           comment: "{{ item.first.capitalize() }} {{ item.middle.capitalize() }} {{ item.last.capitalize() }}"
+           state: present
+         with_items: "{{ user_accounts }}"
+   
+       - name: Generate random password
+         shell: openssl rand -base64 9 | tr -d '[:space:]'
+         register: random_password
+   
+       - name: Store password and salt
+         lineinfile:
+           path: "password-{{ item.name }}"
+           create: yes
+           line: "{{ random_password.stdout | password_hash('sha512', item.name) }}"
+         with_items: "{{ user_accounts }}"
+   ```
+
+3. **Run the Playbook:**
+
+   Run the playbook on the target hosts using the provided inventory file. Replace `your_target_hosts` with the appropriate host group or list of hosts:
+
+   ```bash
+   ansible-playbook -i inventory create_users.yml
+   ```
+
+4. **Commit and Push Changes:**
+
+   After creating and testing the playbook, commit the changes and push them to the remote repository:
+
+   ```bash
+   git add create_users.yml
+   git commit -m "Add create_users playbook"
+   git push origin master
+   ```
+
+Remember to replace placeholders (`https://github.com/path/to/create_users_complex.git`, `your_target_hosts`) with the actual URL to your Git repository and the appropriate host group.
+
+This playbook will create user accounts based on the `user_list.yml` file, set their user comments (GECOS), generate random passwords using SHA-512 encryption, and store the passwords and salts in separate files.
+
+============================================================================
+
+To achieve the tasks described using the `resource_stat.git` repository, you can create the `create_cgroup.yml` playbook and update the `ansible.cfg` configuration file as follows:
+
+1. **Clone the Repository:**
+
+   Clone the `resource_stat.git` repository and navigate to the repository directory:
+
+   ```bash
+   git clone https://github.com/path/to/resource_stat.git
+   cd resource_stat
+   ```
+
+2. **Create the Playbook:**
+
+   Create a `create_cgroup.yml` playbook in the repository directory. Here's an example of how the playbook might look:
+
+   ```yaml
+   ---
+   - name: Create Control Group
+     hosts: your_target_hosts
+     become: yes
+     tasks:
+       - name: Create ex447_stats control group
+         command: cgcreate -g cpuacct,memory,pids:ex447_stats
+         args:
+           creates: /sys/fs/cgroup/{{ item }}/{{ item }}/ex447_stats
+         with_items:
+           - cpuacct
+           - memory
+           - pids
+   ```
+
+3. **Update ansible.cfg:**
+
+   Edit the `ansible.cfg` configuration file to include the specified configuration for displaying system activity. Add the following lines under the `[defaults]` section:
+
+   ```ini
+   [defaults]
+   system_activity = true
+   ```
+
+4. **Run the Playbook:**
+
+   Run the playbook on the target hosts using the provided inventory file. Replace `your_target_hosts` with the appropriate host group or list of hosts:
+
+   ```bash
+   ansible-playbook -i inventory create_cgroup.yml
+   ```
+
+5. **Commit and Push Changes:**
+
+   After creating and testing the playbook and updating the configuration, commit the changes and push them to the remote repository:
+
+   ```bash
+   git add create_cgroup.yml
+   git commit -m "Add create_cgroup playbook"
+   git add ansible.cfg
+   git commit -m "Update ansible.cfg for system activity"
+   git push origin master
+   ```
+
+Remember to replace placeholders (`https://github.com/path/to/resource_stat.git`, `your_target_hosts`) with the actual URL to your Git repository and the appropriate host group.
+
+This playbook will create a control group named `ex447_stats` with specified parameters and update the `ansible.cfg` configuration to display system activity when running the `install_vim.yml` playbook within the control group.
+
+
+==================================================================================================
+
+To complete the task described using the `verify_file.git` repository, you can create the `verify.yml` playbook as follows:
+
+1. **Clone the Repository:**
+
+   Clone the `verify_file.git` repository and navigate to the repository directory:
+
+   ```bash
+   git clone https://github.com/path/to/verify_file.git
+   cd verify_file
+   ```
+
+2. **Create the Playbook:**
+
+   Create a `verify.yml` playbook in the repository directory. Here's an example of how the playbook might look:
+
+   ```yaml
+   ---
+   - name: Verify Files
+     hosts: localhost
+     gather_facts: no
+     tasks:
+       - name: Load file list
+         include_vars:
+           file: verify_files.yml
+   
+       - name: Verify files
+         stat:
+           path: /opt/files/{{ item.file }}
+         register: file_stat
+         with_items: "{{ files_to_verify }}"
+   
+       - name: Compare checksum
+         set_fact:
+           checksum_pass: "{{ item.item.checksum == item.stat.md5 }}"
+         loop: "{{ file_stat.results }}"
+         loop_control:
+           label: "{{ item.item.file }}"
+   
+       - name: Display result
+         debug:
+           msg: "Checksum {{ 'PASS' if checksum_pass else 'FAIL' }}: {{ item.item.file }}"
+         loop: "{{ file_stat.results }}"
+   ```
+
+3. **Run the Playbook:**
+
+   Run the playbook on the localhost:
+
+   ```bash
+   ansible-playbook verify.yml
+   ```
+
+This playbook will compare the SHA-1 hash of each file listed in `verify_files.yml` with the checksum specified in the file. It will display whether the checksum verification passes or fails for each file.
+
+4. **Commit and Push Changes:**
+
+   After creating and testing the playbook, commit the changes and push them to the remote repository:
+
+   ```bash
+   git add verify.yml
+   git commit -m "Add verify playbook"
+   git push origin master
+   ```
+
+Remember to replace placeholders (`https://github.com/path/to/verify_file.git`) with the actual URL to your Git repository.
+
+This playbook will work with any `verify_files.yml` and compare checksums for files located in the `/opt/files` directory on the control node.
+
+=====================================================================
+
+Certainly! Here's an example Ansible playbook that gathers various facts of hosts including IP address, DNS information, DHCP details, and Fully Qualified Domain Name (FQDN):
+
+```yaml
+---
+- name: Gather Host Facts
+  hosts: your_target_hosts
+  gather_facts: yes
+  tasks:
+    - name: Display Host Facts
+      debug:
+        var: hostvars[inventory_hostname]
+```
+
+In this playbook:
+
+1. Replace `your_target_hosts` with the hosts you want to gather facts from.
+2. `gather_facts: yes` ensures that Ansible gathers facts from the hosts before executing tasks.
+
+When you run this playbook, Ansible will gather facts about each target host, which includes details like IP addresses, DNS information, DHCP details, and FQDN. The `debug` task will then display all gathered facts for each host.
+
+Keep in mind that the specific facts gathered by Ansible might vary depending on the target host's operating system and the Ansible modules installed on your system.
+
+You can run this playbook using the `ansible-playbook` command:
+
+```bash
+ansible-playbook -i inventory.ini gather_facts_playbook.yml
+```
+
+Remember to replace `inventory.ini` with your inventory file and `gather_facts_playbook.yml` with the name of your playbook file. Also, make sure your Ansible is properly configured to connect to the target hosts.
+
+Please note that the availability of certain facts might depend on the target host's operating system and network configuration.
+
+
+-------------------------------------------------------
+
+Sure, I understand. If you want to display separate facts individually, you can modify the playbook to access and display specific facts for each host. Here's an updated example that separates the facts:
+
+```yaml
+---
+- name: Gather Host Facts
+  hosts: your_target_hosts
+  gather_facts: yes
+  tasks:
+    - name: Display IP Address
+      debug:
+        msg: "IP Address of {{ inventory_hostname }} is {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+      
+    - name: Display DNS Servers
+      debug:
+        msg: "DNS Servers for {{ inventory_hostname }} are {{ hostvars[inventory_hostname]['ansible_dns']['nameservers'] }}"
+      
+    - name: Display DHCP Client State
+      debug:
+        msg: "DHCP Client State on {{ inventory_hostname }} is {{ hostvars[inventory_hostname]['ansible_interfaces'] | map('extract', hostvars[inventory_hostname]['ansible_interfaces'], 'dhcp4') }}"
+      
+    - name: Display FQDN
+      debug:
+        msg: "FQDN of {{ inventory_hostname }} is {{ hostvars[inventory_hostname]['ansible_fqdn'] }}"
+```
+
+In this updated playbook, each task focuses on a specific fact and displays it using the `debug` module. Replace `your_target_hosts` with the hosts you want to gather facts from.
+
+This playbook will display the IP address, DNS servers, DHCP client state, and FQDN for each host separately.
+
+Again, run this playbook using the `ansible-playbook` command:
+
+```bash
+ansible-playbook -i inventory.ini gather_facts_playbook.yml
+```
+
+Remember to replace `inventory.ini` with your inventory file and `gather_facts_playbook.yml` with the name of your playbook file. Make sure your Ansible is properly configured to connect to the target hosts.
+
+============================================================================
