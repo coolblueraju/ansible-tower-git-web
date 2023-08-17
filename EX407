@@ -1,0 +1,390 @@
+Red Hat Certified Specialist in Ansible (EX407) Practice Exam
+This course is not approved or sponsored by Red Hat.
+
+Exam Solution Part 1 of 3
+From the hands-on lab page, click on the Public IP of Ansible Control Node to bring up the web terminal for our Ansible Control Node. From here, we should become the Ansible user:
+
+su - ansible
+The password is provided on the hands-on lab page in the Credentials section.
+
+Now that we are logged in to our Control Node, let's get started.
+
+Configure Ansible to use the Inventory Store
+Become the root user:
+
+sudo su -
+Edit the Ansible configuration file:
+
+vim /etc/ansible/ansible.cfg
+Inside this file, add the following line below the example inventory line:
+
+inventory = /etc/ansible/exam_inv/
+Save and exit the file.
+
+Diagnose and Fix the Inventory Issue
+The inventory contained in /etc/ansible/exam_inv/inv.py does not work correctly. Let's diagnose and fix it on control1.
+
+Note: You should be able to fix the issues without modifying the contents of the file.
+
+Demonstrate the issue by listing all hosts:
+
+ansible all --list-hosts
+The error states Ansible is unable to parse /etc/ansible/exam_inv/inv.py as an inventory source. Let's take a look at the files in our inventory directory:
+
+ls -l /etc/ansible/exam_inv/
+From here, we can see the inv.py file is not executable. We can resolve this with the following command:
+
+sudo chmod u+x /etc/ansible/exam_inv/inv.py
+This will allow the ansible user to execute the inv.py file and should resolve our issue. Log out of the root user session to list all hosts again as the ansible user to verify.
+
+Create an Ansible Host Group
+Create a file named group in our inventory directory:
+
+vim /etc/ansible/exam_inv/group
+Add the following content:
+
+[testservers]
+node2
+Save and close this file to complete this task.
+
+Increase the Default Timeout to 60 Seconds
+Edit the Ansible configuration file:
+
+sudo vim /etc/ansible/ansible.cfg
+Add the following line in the SSH Timeout section:
+
+#timeout = 60
+Save and close the file to complete this task.
+
+Configure Ansible to Run 10 Threads by Default
+Edit the Ansible configuration file:
+
+sudo vim /etc/ansible/ansible.cfg
+Add the following line in the some default values... section:
+
+forks  = 10
+Save and close the file to complete this task.
+
+Exam Solution Part 2 of 3
+Edit and Fix the Syntax Errors in the File
+Now, edit the file /home/ansible/exam/ad-hoc.sh and fix the syntax errors within the file.
+
+Edit the ad-hoc.sh file:
+
+vim /home/ansible/exam/ad-hoc.sh
+The contents of ad-hoc.sh should be as follows:
+
+```
+#!/bin/sh
+## This script should run without error completing the documented tasks before completing the exam.
+
+# Create the user john on labservers
+ansible labservers -b -m user -a "name=john"
+
+# Copy the file demo to /home/ansible/demo on node1
+ansible node1 -m copy -a "src=/home/ansible/files/demo dest=/home/ansible/demo"
+
+# Install elinks on labservers
+ansible labservers -b -m yum -a "name=elinks state=latest"
+```
+Save and close this file. Feel free to run the file to ensure it was modified correctly:
+
+/home/ansible/exam/ad-hoc.sh
+If all three plays complete successfully, this task is complete.
+
+Create an Encrypted Vault File
+Create an encrypted vault file containing the text "secret: bluebird" and store it in the file /home/ansible/exam/secure on the Ansible control node control1.
+
+Note: Make a note of the password used so you may access the file contents later.
+
+Create a simple text file called secure:
+
+vim /home/ansible/exam/secure
+Add the following contents:
+
+secret: bluebird
+Save and close this file.
+
+Run ansible-vault encrypt /home/ansible/exam/secure. Provide a password and make sure to note the password you provided. We'll need this password later in order to access the file contents.
+
+Create and Run a Playbook
+Create and run a playbook in /home/ansible/exam/security.yml on control1 that uses the previously created vault /home/ansible/exam/secure. The playbook will print the value of "secret" in a file called /mnt/classified on localhost control1.
+
+Create a playbook:
+
+vim /home/ansible/exam/security.yml
+Add the following contents:
+
+---
+- hosts: localhost
+  vars_files:
+    - /home/ansible/exam/secure
+  become: yes
+  tasks:
+    - name: create classified directory
+      file:
+        state: touch
+        name: /mnt/classified
+    - name: insert secret text into file
+      lineinfile:
+        path: /mnt/classified
+        line: "{{ secret }}"
+Save and close this file. Now, let's run the playbook:
+
+ansible-playbook /home/ansible/exam/security.yml --ask-vault-pass
+Provide the Vault password that was used in the previous task. After the playbook has run, let's view the contents of our classified file to ensure our playbook completed successfully.
+
+cat /mnt/classified
+If this file contains "bluebird", this task is complete.
+
+Edit the Shell Script and Add Commands
+Edit the shell script in /home/ansible/exam/ad-hoc-2.sh on the Ansible control node control1 and add Ansible ad-hoc commands that will complete the tasks described in the file contents.
+
+Edit the file /home/ansible/exam/ad-hoc-2.sh
+
+vim /home/ansible/exam/ad-hoc-2.sh
+Add the following contents:
+
+#!/bin/sh
+
+## Write Ansible ad-hoc commands below
+
+# Create new file called /opt/test.sh
+# Set owner of the file to ansible
+# Set mode to 0755
+ansible localhost -b -m file -a 'state=touch name=/opt/test.sh mode=0755 owner=ansible'
+
+
+# Add content to the file:
+# #!/bin/sh
+# echo hi there
+
+ansible -b localhost -m lineinfile -a 'line="#!/bin/sh\necho hi there" path=/opt/test.sh'
+Save and close this file. Now, let's run the playbook:
+
+/home/ansible/exam/ad-hoc-2.sh
+When the playbook completes, run test.sh to ensure it produces the expected output:
+
+/opt/test.sh
+Create a Playbook That Prints Server Information
+Create a playbook in /home/ansible/exam/fact.yml on control1 that prints the following information specific to each host in /var/www/html/facts.htm for each of the servers in the web group: <DISTRIBUTION>: <HOST_IPV4_ADDR> <MAC_ADDR>.
+
+Note: This solution assumes httpd is installed (this will be done in a later task).
+
+The file output will resemble the following:
+
+CentOS: 10.0.1.221 02:7c:ef:0a:2b:4c
+Create a file called /home/ansible/exam/facts.yml:
+
+vim /home/ansible/exam/facts.yml
+Add the following contents to it:
+
+---
+- hosts: web
+  become: yes
+  tasks:
+    - name: create file
+      file:
+        state: touch
+        name: /var/www/html/facts.htm
+    - name: add line to file containing facts
+      lineinfile:
+        path: /var/www/html/facts.htm
+        line: "{{ ansible_distribution }}: {{ ansible_default_ipv4['address'] }} {{ ansible_default_ipv4['macaddress'] }} "
+As noted above, this task cannot be tested until httpd has been installed. We can install httpd with an ad-hoc command for the purpose of testing this task:
+
+ansible web -b -m yum -a "name=httpd state=latest"
+Once httpd is installed, run the playbook:
+
+ansible-playbook /home/ansible/exam/facts.yml
+Verify our playbook ran successfully:
+
+ssh node2 "cat /var/www/html/facts.htm"
+Exam Solution Part 3 of 3
+Create a Role
+Create a role in /home/ansible/exam/roles/httpdServer on control1 that installs the package httpd, starts the service, and enables the service on boot. The role should have a handler called restart httpd that restarts the httpd service as well.
+
+To create a frame for the role, enter:
+
+ansible-galaxy init /home/ansible/exam/roles/httpdServer
+Edit /home/ansible/exam/roles/httpdServer/tasks/main.yml to contain the following:
+
+	---
+	# tasks file for /home/ansible/exam/roles/httpdServer
+
+	- yum:
+	    state: latest
+	    name: httpd
+
+	- service:
+	    name: httpd
+	    state: started
+	    enabled: yes
+Edit /home/ansible/exam/roles/httpdServer/handlers/main.yml to contain the following:
+
+	---
+	# handlers file for /home/ansible/exam/roles/httpdServer
+
+	- name: restart httpd
+	  service:
+	    name: httpd
+	    state: restarted
+	  listen: restart httpd
+Create a Playbook Applying httpdServer Role to web Group
+Create a playbook in /home/ansible/exam/webserver.yml on control1 that applies the httpdServer role to the web group.
+
+This task also requires we:
+
+Deploy a file to /var/www/html/index.html containing the hostname of the host where it is deployed.
+Change LogLevel to error in /etc/httpd/conf/httpd.conf.
+Restart httpd only on httpd.conf file change.
+To complete this task:
+
+Create a file called /home/ansible/exam/webserver.yml containing the following:
+
+	---
+	- hosts: web
+	  become: yes
+	  roles:
+	    - /home/ansible/exam/roles/httpdServer
+	  tasks:
+	    - name: create index file with hostname
+	      copy:
+	        content: "{{ ansible_hostname }}"
+	        dest: /var/www/html/index.html
+	    - name: update log level
+	      replace:
+	        path: /etc/httpd/conf/httpd.conf
+	        regexp: "LogLevel.*$"
+	        replace: "LogLevel error"
+	      notify: "restart httpd"
+We can test this playbook with the command:
+
+ansible-playbook /home/ansible/exam/webserver.yml
+Create a Playbook Installing a Role of Your Choosing
+Create a playbook in /home/ansible/exam/install_role.yml that installs a role of your choosing using ansible-galaxy to /home/ansible/exam/roles/ on the Ansible control host.
+
+Create a file called /home/ansible/exam/install_role.yml containing similar content (the actual role used may vary):
+
+---
+- hosts: localhost
+  tasks:
+    - name: install role
+      shell: "ansible-galaxy -p /home/ansible/exam/roles/ install MindPointGroup.RHEL7-STIG"
+Run the playbook:
+
+ansible-playbook /home/ansible/exam/install_role.yml
+Verify the new role was added (the role you used should be listed here):
+
+ls -l /home/ansible/exam/roles/
+View the File and Create a Playbook
+View the file http://files.example.com/user_list.yml from control1. Create a playbook in /home/ansible/exam/users.yml that follows the instructions provided in the file.
+
+View the file:
+
+curl http://files.example.com/user_list.yml
+Create the file /home/ansible/exam/users.yml containing the following:
+
+---
+- hosts: localhost
+  tasks:
+  - name: download user_list.yml
+    get_url:
+      url: http://files.example.com/user_list.yml
+      dest: /home/ansible/files/user_list.yml
+
+- hosts: node1
+  become: yes
+  vars_files:
+    - /home/ansible/files/user_list.yml
+  tasks:
+  - name: create groups from file
+    group:
+      name: "{{ item }}"
+    with_items:
+      - "{{ user_groups }}"
+  - name: create users for each group in staff
+    user:
+      name: "{{ item }}"
+      group: staff
+    with_items:
+      - "{{ staff }}"
+  - name: create users for each group in students
+    user:
+      name: "{{ item }}"
+      group: students
+    with_items:
+      - "{{ students }}"
+  - name: create users for each group in faculty
+    user:
+      name: "{{ item }}"
+      group: faculty
+    with_items:
+      - "{{ faculty }}"
+Run the playbook to complete this task:
+
+ansible-playbook /home/ansible/exam/users.yml
+Create a Playbook Downloading and Unarchiving the Tarball
+Create a playbook in /home/ansible/exam/unarchive.yml that downloads http://files.example.com/files.tgz and unarchives the tarball into /mnt/ on the Ansible control node.
+
+Create a file called /home/ansible/exam/unarchive.yml that contains the following text:
+
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: download files.tgz
+    get_url:
+      url: http://files.example.com/files.tgz
+      dest: /mnt/files.tgz
+  - name: unarchive files.tgz
+    unarchive:
+      src: /mnt/files.tgz
+      dest: /mnt/
+Run the playbook to complete this task:
+
+ansible-playbook /home/ansible/exam/unarchive.yml
+Verify our files have been unarchived as expected:
+
+ls -l /mnt/
+Create a Playbook That Tries to Create a File Using a Block Group
+Create a playbook in /home/ansible/exam/make_secret.yml that tries to create a file in /mnt/secret on control1 using a block group: don't create a directory. If the task fails, the message "Unable to create secret file" should be output in STDOUT.
+
+Create a file called /home/ansible/exam/make_secret.yml containing the following text:
+
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: create file
+    block:
+      - file:
+          name: /mnt/secret/newfile
+          state: touch
+    rescue:
+      - name: output error message
+        debug:
+          msg: "Unable to create secret file"
+Run the playbook. If we see the debug message, this task is complete.
+
+ansible-playbook /home/ansible/exam/make_secret.yml
+Create a Playbook That Tries to Install a Package on node2
+Create a playbook in /home/ansible/exam/break.yml on control1 that tries to install a package called fluffy on node2. The playbook continues running if the package install fails and will output the message "Attempted fluffy install!" in STDOUT.
+
+Create a file called /home/ansible/exam/break.yml that contains the following text:
+
+---
+- hosts: node2
+  become: yes
+  ignore_errors: yes
+  tasks:
+  - name: install fluffy
+    yum:
+      name: fluffy
+      state: latest
+  - debug:
+      msg: "Attempted fluffy install!"
+Run the playbook:
+
+ansible-playbook /home/ansible/exam/break.yml
+If we see the debug message, this task is complete.
