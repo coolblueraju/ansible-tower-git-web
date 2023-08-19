@@ -5,7 +5,7 @@
   
   tasks:
     - name: Install HAProxy
-      yum:
+      dnf:
         name: haproxy
         state: present
 
