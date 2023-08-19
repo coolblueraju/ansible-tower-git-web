@@ -2,7 +2,7 @@
   vars:
   - myvar: "Vimal"
   tasks:
-  - package: "name=httpd state=present"
+  - dnf: "name=httpd state=present"
   - copy: "content='hi LW {{ myvar }} finally end to end automated ....' dest=/var/www/html/index.html"
   - service: "name=httpd state=started"
     
